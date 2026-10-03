@@ -9,7 +9,13 @@
     <meta property="og:description" content="سامانه رصد خودکار کالاهای ترند عمده‌فروشی جهانی، ارزیابی تامین‌کنندگان، استخراج قیمت‌های پلکانی، ترجمه و سئو فارسی، همگام‌سازی گوگل شیت و کاتالوگ مینی‌آپ تلگرام" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <!-- Telegram Mini App WebApp SDK with safe fallback for filtered networks -->
+    <!-- Telegram Mini App WebApp SDK.
+         1) Shim: gives window.Telegram a safe stub so app code never crashes when the
+            real SDK is unreachable (telegram.org is filtered on some networks).
+         2) The real SDK is injected AFTER `load` instead of a blocking/deferred
+            <script src>: deferred scripts run in document order, so a hanging
+            telegram.org request delays DOMContentLoaded and the app bundle itself
+            (measured: ~21s blank page on a filtered network, vs ~1s without it). -->
     <script>
       if (!window.Telegram) {
         window.Telegram = {
@@ -25,11 +31,11 @@
             viewportStableHeight: window.innerHeight || 800,
             headerColor: '#17212b',
             backgroundColor: '#17212b',
-            ready: function() {},
-            expand: function() {},
-            close: function() {},
-            openTelegramLink: function(url) { window.open(url, '_blank'); },
-            openLink: function(url) { window.open(url, '_blank'); },
+            ready: function () {},
+            expand: function () {},
+            close: function () {},
+            openTelegramLink: function (url) { window.open(url, '_blank'); },
+            openLink: function (url) { window.open(url, '_blank'); },
             MainButton: {
               text: '',
               color: '#2481cc',
@@ -37,22 +43,41 @@
               isVisible: false,
               isActive: true,
               isProgressVisible: false,
-              setText: function(t) { this.text = t; return this; },
-              show: function() { this.isVisible = true; return this; },
-              hide: function() { this.isVisible = false; return this; },
-              enable: function() { this.isActive = true; return this; },
-              disable: function() { this.isActive = false; return this; },
-              onClick: function(fn) { this._handler = fn; return this; },
-              offClick: function() { this._handler = null; return this; }
+              setText: function (t) { this.text = t; return this; },
+              show: function () { this.isVisible = true; return this; },
+              hide: function () { this.isVisible = false; return this; },
+              enable: function () { this.isActive = true; return this; },
+              disable: function () { this.isActive = false; return this; },
+              onClick: function (fn) { this._handler = fn; return this; },
+              offClick: function () { this._handler = null; return this; }
             }
           }
         };
       }
     </script>
-    <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      window.addEventListener('load', function () {
+        var tg = document.createElement('script');
+        tg.src = 'https://telegram.org/js/telegram-web-app.js';
+        tg.async = true;
+        document.head.appendChild(tg);
+      });
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Non-blocking webfont load (was a render-blocking stylesheet) -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    >
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap"
+      >
+    </noscript>
   </head>
   <body class="bg-slate-900 text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-slate-900">
     <div id="root"></div>

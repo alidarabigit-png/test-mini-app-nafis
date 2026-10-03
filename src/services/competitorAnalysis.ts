@@ -31,6 +31,13 @@ export async function analyzeCompetitorMarket(
     }),
   });
 
+  const contentType = response.headers.get('content-type') || '';
+  // Static hosting answers unknown routes with index.html (SPA fallback), so a
+  // "successful" 200 can still be HTML — fail with a clear error instead.
+  if (!response.ok || !contentType.includes('application/json')) {
+    throw new Error('API endpoint /api/competitor-analysis is not available on this deployment');
+  }
+
   const json = await response.json();
   if (json.success && json.data) {
     return json.data;

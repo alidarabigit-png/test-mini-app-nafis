@@ -13,7 +13,11 @@ export const DEFAULT_RATES: CurrencyRates = {
 export async function fetchLiveExchangeRates(source: string = 'TGJU'): Promise<CurrencyRates> {
   try {
     const res = await fetch('/api/currency-rates');
-    if (res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    // On a static host (Netlify/_redirects, .htaccess) the SPA fallback answers
+    // /api/* with index.html and HTTP 200 — check the content type instead of
+    // letting res.json() explode, then fall back to the local calculation below.
+    if (res.ok && contentType.includes('application/json')) {
       const data = await res.json();
       return {
         usd: data.usd,

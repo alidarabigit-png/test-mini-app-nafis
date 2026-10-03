@@ -64,7 +64,9 @@ export const CompetitorAnalysisModal: React.FC<CompetitorAnalysisModalProps> = (
       setResult(data);
     } catch (err: any) {
       console.error(err);
-      setError('خطا در ارتباط با هوش مصنوعی Gemini. لطفاً دوباره تلاش کنید.');
+      setError(
+        'سرویس تحلیل رقبا در دسترس نیست: در نسخه استاتیک (میزبانی‌شده روی هاست ساده) نیاز به سرور server.ts است؛ در غیر این صورت دوباره تلاش کنید.'
+      );
     } finally {
       setLoading(false);
     }
